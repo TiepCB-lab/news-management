@@ -1,0 +1,53 @@
+server:
+  port: ${SERVER_PORT:8080}
+  servlet:
+    context-path: /
+
+spring:
+  application:
+    name: news-management
+
+  # Cấu hình Database
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/news_management_db}
+    username: ${SPRING_DATASOURCE_USERNAME:postgres}
+    password: ${SPRING_DATASOURCE_PASSWORD:postgres}
+
+  # Cấu hình Hibernate / JPA
+  jpa:
+    hibernate:
+      ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO:update}
+    show-sql: ${SPRING_JPA_SHOW_SQL:true}
+    properties:
+      hibernate:
+        format_sql: true
+    open-in-view: false
+
+  # Giới hạn kích thước upload file
+  servlet:
+    multipart:
+      max-file-size: ${APP_UPLOAD_MAX_FILE_SIZE:5MB}
+      max-request-size: ${APP_UPLOAD_MAX_REQUEST_SIZE:10MB}
+
+# Cấu hình biến toàn cục ứng dụng
+app:
+  # Cấu hình JWT
+  jwt:
+    secret: ${JWT_SECRET:NewsManagementSecretKeyForJwtAuthenticationMustBeAtLeast256BitsLong2026!}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000} # 24 giờ
+  
+  # Cấu hình Upload File
+  upload:
+    dir: ${APP_UPLOAD_DIR:./uploads}
+    allowed-extensions:
+      - .jpg
+      - .jpeg
+      - .png
+      - .webp
+      - .gif
+
+  # Phân trang mặc định
+  pagination:
+    default-page: 1
+    default-limit: 10
+    max-limit: 100
