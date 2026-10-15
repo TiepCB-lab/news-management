@@ -1,0 +1,86 @@
+services:
+  # =========================================================================
+  # 1. Cơ sở dữ liệu PostgreSQL 16
+  # =========================================================================
+  postgres:
+    image: postgres:16-alpine
+    container_name: news_postgres
+    restart: always
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-news_management_db}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres} -d ${POSTGRES_DB:-news_management_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - news_network
+
+  # =========================================================================
+  # 2. Giao diện Web quản trị CSDL pgAdmin 4 (Dành riêng cho bạn Data)
+  # Truy cập tại: http://localhost:5050
+  # Tài khoản: admin@uth.edu.vn | Mật khẩu: admin123
+  # =========================================================================
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: news_pgadmin
+    restart: always
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_EMAIL:-admin@uth.edu.vn}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_PASSWORD:-admin123}
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      - postgres
+    networks:
+      - news_network
+
+  # =========================================================================
+  # 3. Ứng dụng Backend Spring Boot REST API
+  # Truy cập tại: http://localhost:8080
+  # =========================================================================
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: news_api
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${POSTGRES_DB:-news_management_db}
+      SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
+      SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
+      SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      JWT_SECRET: ${JWT_SECRET:-NewsManagementSecretKeyForJwtAuthenticationMustBeAtLeast256BitsLong2026!}
+      JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
+      APP_UPLOAD_DIR: /app/uploads
+    volumes:
+      - uploads_data:/app/uploads
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - news_network
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+  uploads_data:
+    driver: local
+
+networks:
+  news_network:
+    driver: bridge
