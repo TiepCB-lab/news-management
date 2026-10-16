@@ -1,21 +1,33 @@
 package com.uth.newsmanagement.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.Formula;
 
 /**
  * Entity Tin tức (News).
  * Trọng tâm của bài toán quản lý tin tức (Nhiệm vụ 17).
- * 
- * TODO: [DATA] Tối ưu hóa truy vấn:
- * - Đánh index cho các trường thường dùng để filter/sort: created_at, view_count, is_published, category_id.
- * - Có thể áp dụng Full-Text Search PostgreSQL (tsvector) hoặc MySQL FULLTEXT index cho title & content.
+ *
+ * Chiến lược đánh chỉ mục (Indexing Strategy) — V2 Migration:
+ *  - Composite index (is_published + created_at): tối ưu public listing mặc định
+ *  - Composite index (is_published + category_id + created_at): tối ưu lọc theo chuyên mục
+ *  - Composite index (is_published + view_count): tối ưu bảng xếp hạng
+ *  - Composite index (category_id + created_at): tối ưu truy vấn admin
+ *  - Index (author_id): tránh sequential scan trên FK
+ *  - GIN index (fts_vector): tối ưu Full-Text Search PostgreSQL
  */
 @Entity
 @Table(name = "news", indexes = {
-    @Index(name = "idx_news_slug", columnList = "slug"),
-    @Index(name = "idx_news_created_at", columnList = "created_at"),
-    @Index(name = "idx_news_view_count", columnList = "view_count"),
-    @Index(name = "idx_news_published", columnList = "is_published")
+    // --- Single-column indexes ---
+    @Index(name = "idx_news_slug",        columnList = "slug"),
+    @Index(name = "idx_news_created_at",  columnList = "created_at"),
+    @Index(name = "idx_news_view_count",  columnList = "view_count"),
+    @Index(name = "idx_news_published",   columnList = "is_published"),
+    @Index(name = "idx_news_author_id",   columnList = "author_id"),
+    // --- Composite indexes (được bổ sung qua V2 Flyway migration) ---
+    @Index(name = "idx_news_published_created",  columnList = "is_published, created_at"),
+    @Index(name = "idx_news_published_category", columnList = "is_published, category_id, created_at"),
+    @Index(name = "idx_news_published_views",    columnList = "is_published, view_count"),
+    @Index(name = "idx_news_category_created",   columnList = "category_id, created_at")
 })
 public class News extends BaseEntity {
 
@@ -40,6 +52,14 @@ public class News extends BaseEntity {
 
     @Column(name = "is_published", nullable = false)
     private Boolean isPublished = true;
+
+    /**
+     * Cột tsvector STORED GENERATED — được tạo và duy trì bởi PostgreSQL (V2 migration).
+     * Ánh xạ read-only bằng @Formula để Hibernate không cố INSERT/UPDATE giá trị này.
+     * Sử dụng trong các native query Full-Text Search.
+     */
+    @Formula("fts_vector")
+    private String ftsVector;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
