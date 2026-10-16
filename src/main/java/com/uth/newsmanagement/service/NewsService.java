@@ -45,14 +45,26 @@ public class NewsService {
     // ==========================================
 
     /**
-     * Lấy danh sách tin tức đã xuất bản, hỗ trợ tìm kiếm và lọc theo chuyên mục
-     * TODO: [DATA] Có thể tối ưu hóa caching hoặc ranking thuật toán tin nóng theo viewCount
+     * Lấy danh sách tin tức đã xuất bản, hỗ trợ tìm kiếm và lọc theo chuyên mục.
+     *
+     * <p>Chiến lược tìm kiếm theo từ khóa:
+     * <ul>
+     *   <li>Keyword ≥ 2 ký tự → dùng {@code PostgreSQL Full-Text Search} (GIN index, O(log N))</li>
+     *   <li>Keyword = 1 ký tự  → fallback {@code LIKE} (tránh lỗi tsquery với chuỗi đơn)</li>
+     * </ul>
      */
     @Transactional(readOnly = true)
     public Page<NewsResponse> getPublicNews(Pageable pageable, String keyword, Long categoryId) {
         Page<News> newsPage;
         if (StringUtils.hasText(keyword)) {
-            newsPage = newsRepository.searchPublicNews(keyword.trim(), pageable);
+            String trimmed = keyword.trim();
+            // Sử dụng FTS khi keyword đủ dài (>=2 ký tự) để tận dụng GIN index
+            if (trimmed.length() >= 2) {
+                newsPage = newsRepository.fullTextSearchPublicNews(trimmed, pageable);
+            } else {
+                // Fallback LIKE cho keyword 1 ký tự
+                newsPage = newsRepository.searchPublicNewsLike(trimmed, pageable);
+            }
         } else if (categoryId != null) {
             newsPage = newsRepository.findByCategoryIdAndIsPublishedTrue(categoryId, pageable);
         } else {
