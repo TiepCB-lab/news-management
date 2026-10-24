@@ -12,6 +12,7 @@ import com.uth.newsmanagement.repository.CategoryRepository;
 import com.uth.newsmanagement.repository.NewsRepository;
 import com.uth.newsmanagement.repository.UserRepository;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -60,7 +61,9 @@ public class NewsService {
             String trimmed = keyword.trim();
             // Sử dụng FTS khi keyword đủ dài (>=2 ký tự) để tận dụng GIN index
             if (trimmed.length() >= 2) {
-                newsPage = newsRepository.fullTextSearchPublicNews(trimmed, pageable);
+                // Native FTS query đã có ORDER BY ts_rank riêng, truyền Pageable không sort để tránh xung đột ORDER BY
+                Pageable ftsPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
+                newsPage = newsRepository.fullTextSearchPublicNews(trimmed, ftsPageable);
             } else {
                 // Fallback LIKE cho keyword 1 ký tự
                 newsPage = newsRepository.searchPublicNewsLike(trimmed, pageable);

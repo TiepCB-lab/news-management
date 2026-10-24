@@ -61,7 +61,7 @@ services:
       SPRING_DATASOURCE_USERNAME: ${POSTGRES_USER:-postgres}
       SPRING_DATASOURCE_PASSWORD: ${POSTGRES_PASSWORD:-postgres123}
       SPRING_JPA_DATABASE_PLATFORM: org.hibernate.dialect.PostgreSQLDialect
-      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      SPRING_JPA_HIBERNATE_DDL_AUTO: ${SPRING_JPA_HIBERNATE_DDL_AUTO:-validate}
       JWT_SECRET: ${JWT_SECRET:-NewsManagementSecretKeyForJwtAuthenticationMustBeAtLeast256BitsLong2026!}
       JWT_EXPIRATION_MS: ${JWT_EXPIRATION_MS:-86400000}
       APP_UPLOAD_DIR: /app/uploads

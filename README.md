@@ -136,10 +136,10 @@ Hệ thống được xây dựng dựa trên sự phối hợp chặt chẽ gi�
 - [x] Triển khai lớp `DataSeeder` tự động nạp dữ liệu danh mục và tài khoản mẫu khi khởi động hệ thống.
 - [x] Xây dựng `NewsRepository` tích hợp phân trang (`Pageable`), sắp xếp đa tiêu chí và đếm lượt xem nguyên tử.
 - [x] Xây dựng các dịch vụ nghiệp vụ tin tức tại `NewsService` và điều phối tại Controllers.
-- [ ] **TODO: [DATA]** Tối ưu hóa câu truy vấn tìm kiếm toàn văn: Ứng dụng **PostgreSQL Full-Text Search** (`to_tsvector`, `to_tsquery`) hoặc triển khai dynamic query với `JpaSpecificationExecutor`.
-- [ ] **TODO: [DATA]** Tối ưu hóa chiến lược đánh chỉ mục (Indexing Strategy) trên các trường: `created_at`, `view_count`, `category_id`, `is_published` để đảm bảo độ trễ truy vấn thấp khi khối lượng bản ghi tăng trưởng lớn.
-- [ ] **TODO: [DATA]** Mở rộng bộ dữ liệu mẫu (Seeder): Sinh tập dữ liệu giả lập từ 30 - 50 bài viết thực tế với đa dạng chủ đề phục vụ đo kiểm hiệu năng sắp xếp và phân trang.
-- [ ] **TODO: [DATA]** (Mở rộng nâng cao): Thay thế cơ chế `ddl-auto: update` bằng công cụ quản trị phiên bản schema chuyên nghiệp (**Flyway Migration**).
+- [x] **[DATA]** Tối ưu hóa câu truy vấn tìm kiếm toàn văn: Ứng dụng **PostgreSQL Full-Text Search** (`to_tsvector`, `to_tsquery`) hoặc triển khai dynamic query với `JpaSpecificationExecutor`.
+- [x] **[DATA]** Tối ưu hóa chiến lược đánh chỉ mục (Indexing Strategy) trên các trường: `created_at`, `view_count`, `category_id`, `is_published` để đảm bảo độ trễ truy vấn thấp khi khối lượng bản ghi tăng trưởng lớn.
+- [x] **[DATA]** Mở rộng bộ dữ liệu mẫu (Seeder): Sinh tập dữ liệu giả lập từ 30 - 50 bài viết thực tế với đa dạng chủ đề phục vụ đo kiểm hiệu năng sắp xếp và phân trang.
+- [x] **[DATA]** (Mở rộng nâng cao): Thay thế cơ chế `ddl-auto: update` bằng công cụ quản trị phiên bản schema chuyên nghiệp (**Flyway Migration**).
 
 ---
 
