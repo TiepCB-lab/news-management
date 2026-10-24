@@ -1,7 +1,6 @@
 package com.uth.newsmanagement.entity;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.Formula;
 
 /**
  * Entity Tin tức (News).
@@ -53,13 +52,6 @@ public class News extends BaseEntity {
     @Column(name = "is_published", nullable = false)
     private Boolean isPublished = true;
 
-    /**
-     * Cột tsvector STORED GENERATED — được tạo và duy trì bởi PostgreSQL (V2 migration).
-     * Ánh xạ read-only bằng @Formula để Hibernate không cố INSERT/UPDATE giá trị này.
-     * Sử dụng trong các native query Full-Text Search.
-     */
-    @Formula("fts_vector")
-    private String ftsVector;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "category_id")
