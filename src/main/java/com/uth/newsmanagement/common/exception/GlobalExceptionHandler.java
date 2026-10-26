@@ -6,7 +6,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
-import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.validation.BindException;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
@@ -22,8 +24,8 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     // 1. Xử lý lỗi validate DTO (@Valid, @NotBlank, @Size, @Email,...)
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    @ExceptionHandler(BindException.class)
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationExceptions(BindException ex) {
         Map<String, String> errors = new HashMap<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.put(error.getField(), error.getDefaultMessage());
@@ -34,6 +36,11 @@ public class GlobalExceptionHandler {
                 errors
         );
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+    }
+
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    public ResponseEntity<ApiResponse<Void>> handleMalformedRequest(Exception ex) {
+        return ResponseEntity.badRequest().body(ApiResponse.error(400, "Dữ liệu gửi lên không đúng định dạng"));
     }
 
     // 2. Xử lý Custom AppException (ResourceNotFound, BadRequest, ...)

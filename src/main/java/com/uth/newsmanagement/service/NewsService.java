@@ -1,6 +1,5 @@
 package com.uth.newsmanagement.service;
 
-import com.uth.newsmanagement.common.exception.BadRequestException;
 import com.uth.newsmanagement.common.exception.ResourceNotFoundException;
 import com.uth.newsmanagement.dto.news.NewsCreateRequest;
 import com.uth.newsmanagement.dto.news.NewsResponse;
@@ -10,6 +9,7 @@ import com.uth.newsmanagement.entity.News;
 import com.uth.newsmanagement.entity.User;
 import com.uth.newsmanagement.repository.CategoryRepository;
 import com.uth.newsmanagement.repository.NewsRepository;
+import com.uth.newsmanagement.repository.NewsSpecifications;
 import com.uth.newsmanagement.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +24,8 @@ import java.util.UUID;
 import java.util.regex.Pattern;
 
 /**
- * Xử lý nghiệp vụ Tin tức (Nhiệm vụ trọng tâm cho cả Backend và Data Specialist).
+ * Xử lý nghiệp vụ Tin tức (Nhiệm vụ trọng tâm cho cả Backend và Data
+ * Specialist).
  */
 @Service
 public class NewsService {
@@ -34,8 +35,8 @@ public class NewsService {
     private final UserRepository userRepository;
 
     public NewsService(NewsRepository newsRepository,
-                       CategoryRepository categoryRepository,
-                       UserRepository userRepository) {
+            CategoryRepository categoryRepository,
+            UserRepository userRepository) {
         this.newsRepository = newsRepository;
         this.categoryRepository = categoryRepository;
         this.userRepository = userRepository;
@@ -48,10 +49,13 @@ public class NewsService {
     /**
      * Lấy danh sách tin tức đã xuất bản, hỗ trợ tìm kiếm và lọc theo chuyên mục.
      *
-     * <p>Chiến lược tìm kiếm theo từ khóa:
+     * <p>
+     * Chiến lược tìm kiếm theo từ khóa:
      * <ul>
-     *   <li>Keyword ≥ 2 ký tự → dùng {@code PostgreSQL Full-Text Search} (GIN index, O(log N))</li>
-     *   <li>Keyword = 1 ký tự  → fallback {@code LIKE} (tránh lỗi tsquery với chuỗi đơn)</li>
+     * <li>Keyword ≥ 2 ký tự → dùng {@code PostgreSQL Full-Text Search} (GIN index,
+     * O(log N))</li>
+     * <li>Keyword = 1 ký tự → fallback {@code LIKE} (tránh lỗi tsquery với chuỗi
+     * đơn)</li>
      * </ul>
      */
     @Transactional(readOnly = true)
@@ -61,7 +65,8 @@ public class NewsService {
             String trimmed = keyword.trim();
             // Sử dụng FTS khi keyword đủ dài (>=2 ký tự) để tận dụng GIN index
             if (trimmed.length() >= 2) {
-                // Native FTS query đã có ORDER BY ts_rank riêng, truyền Pageable không sort để tránh xung đột ORDER BY
+                // Native FTS query đã có ORDER BY ts_rank riêng, truyền Pageable không sort để
+                // tránh xung đột ORDER BY
                 Pageable ftsPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
                 newsPage = newsRepository.fullTextSearchPublicNews(trimmed, ftsPageable);
             } else {
@@ -93,9 +98,11 @@ public class NewsService {
 
         // Tăng lượt xem
         newsRepository.incrementViewCount(news.getId());
-        news.setViewCount(news.getViewCount() + 1);
-
-        return NewsResponse.fromEntity(news);
+        // Chỉ cập nhật DTO: không ghi đè kết quả atomic UPDATE bằng entity đang được
+        // quản lý.
+        NewsResponse response = NewsResponse.fromEntity(news);
+        response.setViewCount(news.getViewCount() + 1);
+        return response;
     }
 
     // ==========================================
@@ -104,15 +111,11 @@ public class NewsService {
 
     /**
      * Lấy danh sách tin tức quản trị (bao gồm cả tin chưa xuất bản)
-     * TODO: [DATA] Bổ sung thêm Specification lọc theo khoảng ngày tạo (date range)
      */
     @Transactional(readOnly = true)
     public Page<NewsResponse> getAdminNews(Pageable pageable, String keyword, Long categoryId) {
-        Page<News> newsPage = newsRepository.searchAdminNews(
-                StringUtils.hasText(keyword) ? keyword.trim() : null,
-                categoryId,
-                pageable
-        );
+        Page<News> newsPage = newsRepository.findAll(
+                NewsSpecifications.matching(keyword, categoryId, false), pageable);
         return newsPage.map(NewsResponse::fromEntity);
     }
 
@@ -211,7 +214,8 @@ public class NewsService {
     private static final Pattern WHITESPACE = Pattern.compile("[\\s]");
 
     public static String toSlug(String input) {
-        if (input == null) return UUID.randomUUID().toString();
+        if (input == null)
+            return UUID.randomUUID().toString();
         String nowhitespace = WHITESPACE.matcher(input).replaceAll("-");
         String normalized = Normalizer.normalize(nowhitespace, Normalizer.Form.NFD);
         String slug = Pattern.compile("\\p{InCombiningDiacriticalMarks}+").matcher(normalized).replaceAll("");
