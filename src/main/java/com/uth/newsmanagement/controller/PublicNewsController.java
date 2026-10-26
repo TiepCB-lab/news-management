@@ -1,14 +1,12 @@
 package com.uth.newsmanagement.controller;
 
-import com.uth.newsmanagement.common.constant.AppConstants;
 import com.uth.newsmanagement.common.dto.ApiResponse;
 import com.uth.newsmanagement.common.dto.PaginationMeta;
 import com.uth.newsmanagement.dto.news.NewsResponse;
+import com.uth.newsmanagement.dto.news.NewsQueryRequest;
 import com.uth.newsmanagement.service.NewsService;
+import jakarta.validation.Valid;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,23 +30,14 @@ public class PublicNewsController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<NewsResponse>>> getPublicNews(
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_NUMBER) int page,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_PAGE_SIZE) int limit,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_BY) String sortBy,
-            @RequestParam(defaultValue = AppConstants.DEFAULT_SORT_DIRECTION) String sortDir,
-            @RequestParam(required = false) String keyword,
-            @RequestParam(required = false) Long categoryId
+            @Valid @ModelAttribute NewsQueryRequest query
     ) {
-        // Đảm bảo page >= 1 từ phía client
-        int pageIndex = Math.max(page - 1, 0);
-        Sort sort = sortDir.equalsIgnoreCase("asc") ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(pageIndex, limit, sort);
-
-        Page<NewsResponse> resultPage = newsService.getPublicNews(pageable, keyword, categoryId);
+        Page<NewsResponse> resultPage = newsService.getPublicNews(
+                query.toPageable(), query.getKeyword(), query.getCategoryId());
 
         PaginationMeta meta = new PaginationMeta(
-                page,
-                limit,
+                query.getPage(),
+                query.getLimit(),
                 resultPage.getTotalElements(),
                 resultPage.getTotalPages()
         );

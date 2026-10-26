@@ -6,6 +6,7 @@ import com.uth.newsmanagement.service.FileStorageService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -15,6 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
  */
 @RestController
 @RequestMapping("/api/v1/files")
+@PreAuthorize("hasAnyRole('USER', 'ADMIN')")
 public class FileController {
 
     private final FileStorageService fileStorageService;
@@ -37,6 +39,7 @@ public class FileController {
      * API Xóa file vật lý
      */
     @DeleteMapping("/{fileName}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<Void>> deleteFile(@PathVariable String fileName) {
         fileStorageService.deleteFile(fileName);
         ApiResponse<Void> response = ApiResponse.success(null, "Xóa file thành công");

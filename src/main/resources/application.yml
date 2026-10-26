@@ -54,9 +54,3 @@ app:
       - .png
       - .webp
       - .gif
-
-  # Phân trang mặc định
-  pagination:
-    default-page: 1
-    default-limit: 10
-    max-limit: 100

@@ -65,6 +65,15 @@ public class SecurityConfig {
                         "Bạn cần đăng nhập (hoặc cung cấp Bearer token hợp lệ) để truy cập tài nguyên này"
                 );
                 response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
+            }).accessDeniedHandler((request, response, accessDeniedException) -> {
+                response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+                response.setCharacterEncoding("UTF-8");
+                response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+                ApiResponse<Void> apiResponse = ApiResponse.error(
+                        HttpServletResponse.SC_FORBIDDEN,
+                        "Bạn không có quyền thực hiện thao tác này"
+                );
+                response.getWriter().write(objectMapper.writeValueAsString(apiResponse));
             }))
 
             // 4. Phân chia quyền hạn Public / Private APIs theo yêu cầu đề bài

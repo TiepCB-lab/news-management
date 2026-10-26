@@ -1,0 +1,168 @@
+{
+  "info": {
+    "name": "News Management API",
+    "description": "Các request mẫu cho API đăng nhập, đọc/quản lý tin tức và upload file. Chạy server trước, đặt accessToken sau khi đăng nhập để gọi các request private.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{accessToken}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080" },
+    { "key": "accessToken", "value": "" },
+    { "key": "categoryId", "value": "1" },
+    { "key": "newsId", "value": "1" },
+    { "key": "slugOrId", "value": "1" },
+    { "key": "fileName", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Register",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"student01\",\n  \"email\": \"student01@example.com\",\n  \"password\": \"secret123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/auth/register"
+          }
+        },
+        {
+          "name": "Login (seed admin)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Tài khoản mẫu được tạo khi database trống. Lấy data.accessToken từ response và gán vào collection variable accessToken để gọi API private.",
+            "url": "{{baseUrl}}/api/v1/auth/login"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Public News",
+      "item": [
+        {
+          "name": "List news (search, filter, sort, pagination)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": {
+              "raw": "{{baseUrl}}/api/v1/public/news?page=1&limit=10&sortBy=createdAt&sortDir=desc&keyword=&categoryId=",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "v1", "public", "news"],
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" },
+                { "key": "sortBy", "value": "createdAt" },
+                { "key": "sortDir", "value": "desc" },
+                { "key": "keyword", "value": "", "disabled": true },
+                { "key": "categoryId", "value": "", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Get news detail by slug or ID",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/public/news/{{slugOrId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Private News (Bearer token)",
+      "item": [
+        {
+          "name": "List and search news",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/api/v1/admin/news?page=1&limit=10&sortBy=createdAt&sortDir=desc&keyword=&categoryId=",
+            "description": "Có thể bỏ trống keyword/categoryId; sortBy mặc định là createdAt, sortDir nhận asc hoặc desc."
+          }
+        },
+        {
+          "name": "Create news",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bài viết thử nghiệm\",\n  \"summary\": \"Tóm tắt bài viết\",\n  \"content\": \"Nội dung bài viết\",\n  \"thumbnailUrl\": \"\",\n  \"isPublished\": true,\n  \"categoryId\": {{categoryId}}\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "description": "Thay categoryId bằng ID danh mục có trong database. Response trả về id để dùng cho request cập nhật/xóa.",
+            "url": "{{baseUrl}}/api/v1/admin/news"
+          }
+        },
+        {
+          "name": "Update news",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Bài viết đã cập nhật\",\n  \"summary\": \"Tóm tắt mới\",\n  \"content\": \"Nội dung mới\",\n  \"isPublished\": true\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": "{{baseUrl}}/api/v1/admin/news/{{newsId}}"
+          }
+        },
+        {
+          "name": "Delete news",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/admin/news/{{newsId}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Private Files (Bearer token)",
+      "item": [
+        {
+          "name": "Upload image",
+          "request": {
+            "method": "POST",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "file", "type": "file", "src": "" }
+              ]
+            },
+            "description": "Chọn file ảnh tại máy trước khi gửi. API chấp nhận jpg, jpeg, png, webp, gif; giới hạn mặc định 5 MB.",
+            "url": "{{baseUrl}}/api/v1/files/upload"
+          }
+        },
+        {
+          "name": "Delete uploaded file",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/api/v1/files/{{fileName}}",
+            "description": "Gán fileName bằng tên file được trả về từ request Upload image."
+          }
+        }
+      ]
+    }
+  ]
+}

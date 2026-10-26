@@ -1,12 +1,15 @@
-# 📰 Enterprise News Management Platform - RESTful API Specification
+# 📰 News Management REST API — Nhiệm vụ 17
 
 > **Học Kỳ Doanh Nghiệp - Trường Đại Học Giao Thông Vận Tải TP.HCM (UTH)**  
 > **Tài Liệu Đặc Tả Kỹ Thuật, Kiến Trúc Hệ Thống & Hướng Dẫn Vận Hành**  
-> *Phiên bản: 1.0.0 (Production-Ready) | Kiến trúc: Clean Layered Architecture*
+> _Trạng thái: Đang hoàn thiện theo yêu cầu bài tập | Kiến trúc: Layered Architecture_
+
+Theo dõi các đợt hoàn thiện và tiêu chí bàn giao tại [Tiến độ dự án](docs/PROGRESS.md).
 
 ---
 
 ## 📌 Mục Lục
+
 1. [Tổng Quan Kiến Trúc & Công Nghệ](#-tổng-quan-kiến-trúc--công-nghệ)
 2. [Cấu Trúc Thư Mục & Phân Tầng Hệ Thống](#-cấu-trúc-thư-mục--phân-tầng-hệ-thống)
 3. [Phân Định Trách Nhiệm Kỹ Thuật (WBS / Task Delegation)](#-phân-định-trách-nhiệm-kỹ-thuật-wbs--task-delegation)
@@ -22,15 +25,15 @@
 
 Hệ thống được thiết kế theo tiêu chuẩn công nghiệp nhằm đảm bảo tính toàn vẹn dữ liệu, hiệu năng truy vấn cao và khả năng mở rộng (scalability):
 
-| Phân Hệ | Công Nghệ Áp Dụng | Mô Tả Kỹ Thuật |
-| :--- | :--- | :--- |
-| **Nền Tảng Cốt Lõi** | Java 17 LTS + Spring Boot 3.3.4 | Nền tảng hướng đối tượng strongly-typed, tối ưu hóa bộ nhớ và luồng thực thi. |
-| **Bảo Mật & Phân Quyền** | Spring Security 6 + JJWT 0.12.6 | Cơ chế xác thực phi trạng thái (Stateless Session) sử dụng thuật toán HMAC-SHA256. |
-| **Lưu Trữ Dữ Liệu** | PostgreSQL 16 Alpine | Cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, hỗ trợ đánh chỉ mục B-tree và Full-Text Search. |
-| **Tầng Ánh Xạ Đối Tượng** | Spring Data JPA + Hibernate 6 | Quản trị giao dịch tự động (Declarative Transactions), Auditing thời gian thực. |
-| **Chuẩn Hóa Đầu Vào** | Jakarta Bean Validation | Kiểm định nghiêm ngặt tính hợp lệ của dữ liệu đầu vào ngay tại tầng Controller. |
-| **Container Hóa** | Docker & Docker Compose | Multi-stage build nhằm cô lập môi trường thực thi, dung lượng image tối ưu (~180MB). |
-| **Quản Trị Cơ Sở Dữ Liệu** | pgAdmin 4 Web Interface | Cung cấp giao diện web trực quan để giám sát, truy vấn và quản trị schema CSDL. |
+| Phân Hệ                    | Công Nghệ Áp Dụng               | Mô Tả Kỹ Thuật                                                                             |
+| :------------------------- | :------------------------------ | :----------------------------------------------------------------------------------------- |
+| **Nền Tảng Cốt Lõi**       | Java 17 LTS + Spring Boot 3.3.4 | Nền tảng hướng đối tượng strongly-typed, tối ưu hóa bộ nhớ và luồng thực thi.              |
+| **Bảo Mật & Phân Quyền**   | Spring Security 6 + JJWT 0.12.6 | Cơ chế xác thực phi trạng thái (Stateless Session) sử dụng thuật toán HMAC-SHA256.         |
+| **Lưu Trữ Dữ Liệu**        | PostgreSQL 16 Alpine            | Cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, hỗ trợ đánh chỉ mục B-tree và Full-Text Search. |
+| **Tầng Ánh Xạ Đối Tượng**  | Spring Data JPA + Hibernate 6   | Quản trị giao dịch tự động (Declarative Transactions), Auditing thời gian thực.            |
+| **Chuẩn Hóa Đầu Vào**      | Jakarta Bean Validation         | Kiểm định nghiêm ngặt tính hợp lệ của dữ liệu đầu vào ngay tại tầng Controller.            |
+| **Container Hóa**          | Docker & Docker Compose         | Multi-stage build nhằm cô lập môi trường thực thi, dung lượng image tối ưu (~180MB).       |
+| **Quản Trị Cơ Sở Dữ Liệu** | pgAdmin 4 Web Interface         | Cung cấp giao diện web trực quan để giám sát, truy vấn và quản trị schema CSDL.            |
 
 ---
 
@@ -112,7 +115,9 @@ news-management/
 Hệ thống được xây dựng dựa trên sự phối hợp chặt chẽ giữa 2 kỹ sư chuyên môn hóa:
 
 ### 1. Kỹ sư Backend (Lead Backend Engineer)
-*Chịu trách nhiệm về Kiến trúc hệ thống, Chuẩn hóa API, Bảo mật tầng mạng và Hạ tầng triển khai.*
+
+_Chịu trách nhiệm về Kiến trúc hệ thống, Chuẩn hóa API, Bảo mật tầng mạng và Hạ tầng triển khai._
+
 - [x] Thiết kế khung kiến trúc tổng thể dự án trên nền tảng Spring Boot 3.3.4 và Java 17.
 - [x] Đóng gói và thiết lập quy trình Container hóa với Dockerfile (Multi-stage) và Docker Compose.
 - [x] Thiết lập cơ chế cấu hình động qua biến môi trường (`.env`, `application.yml`).
@@ -123,13 +128,16 @@ Hệ thống được xây dựng dựa trên sự phối hợp chặt chẽ gi�
 - [x] Xây dựng API Đăng ký tài khoản kèm cơ chế băm mật khẩu chuẩn công nghiệp (`BCryptPasswordEncoder`).
 - [x] Xây dựng API Đăng nhập và quản trị vòng đời của Access Token.
 - [x] Xây dựng phân hệ Upload và Xóa tệp tin tĩnh với cơ chế kiểm tra định dạng và chống tấn công Path Traversal.
-- [ ] **TODO: [BACKEND]** Xuất bản tài liệu kỹ thuật tương tác qua OpenAPI/Swagger và Postman Collection phục vụ kiểm thử.
-- [ ] **TODO: [BACKEND]** Cấu hình cơ chế phân quyền chi tiết dựa trên Role (RBAC) cho các thao tác nhạy cảm.
+- [x] Tạo Postman Collection mẫu để gọi các API chính.
+- [ ] **TODO: [BACKEND]** Bổ sung tài liệu tương tác qua OpenAPI/Swagger.
+- [x] Cấu hình phân quyền theo Role cho thao tác quản lý tin và file.
 
 ---
 
 ### 2. Kỹ sư Dữ liệu (Data & Persistence Specialist)
-*Chịu trách nhiệm về Thiết kế CSDL, Tối ưu hóa truy vấn, Đánh chỉ mục và Nghiệp vụ tin tức.*
+
+_Chịu trách nhiệm về Thiết kế CSDL, Tối ưu hóa truy vấn, Đánh chỉ mục và Nghiệp vụ tin tức._
+
 - [x] Thiết kế mô hình dữ liệu quan hệ (ERD) cho các thực thể: `users`, `categories`, `news`.
 - [x] Cấu hình môi trường quản trị CSDL trực quan pgAdmin 4 trên nền tảng Docker.
 - [x] Định nghĩa và cấu hình ánh xạ JPA Entities (`@Entity`, `@Table`, `@Index`, `@ManyToOne`).
@@ -148,6 +156,7 @@ Hệ thống được xây dựng dựa trên sự phối hợp chặt chẽ gi�
 Dự án cung cấp 2 quy trình vận hành tiêu chuẩn, đáp ứng linh hoạt cho giai đoạn phát triển cũng như đánh giá chất lượng:
 
 ### Quy trình 1: Môi Trường Phát Triển Cục Bộ (Local Development Workflow)
+
 > **Mục tiêu:** Tách biệt CSDL vào container để đảm bảo tính cô lập, đồng thời cho phép Kỹ sư Backend tận dụng tính năng Debug, Hot-reload và thực thi nhanh chóng trên IDE máy trạm.
 
 1. **Khởi chạy CSDL PostgreSQL 16 và giao diện pgAdmin 4:**
@@ -174,6 +183,7 @@ Dự án cung cấp 2 quy trình vận hành tiêu chuẩn, đáp ứng linh ho�
 ---
 
 ### Quy trình 2: Môi Trường Triển Khai Toàn Diện (Fullstack Containerized Deployment)
+
 > **Mục tiêu:** Triển khai khép kín toàn bộ hệ sinh thái (Ứng dụng + CSDL + Giao diện quản trị) chỉ với một câu lệnh duy nhất. Phục vụ công tác đánh giá đồ án, kiểm thử chấp nhận (UAT) mà không cần cài đặt JDK hay CSDL thủ công trên máy chủ.
 
 ```powershell
@@ -191,9 +201,10 @@ docker compose down -v
 ```
 
 Sau khi cụm dịch vụ khởi động hoàn tất, các cổng giao tiếp được phân bổ như sau:
-*   **Cổng RESTful API Backend:** `http://localhost:8080`
-*   **Cổng Quản trị CSDL pgAdmin 4:** `http://localhost:5050`
-*   **Cổng Dịch vụ PostgreSQL:** `localhost:5432`
+
+- **Cổng RESTful API Backend:** `http://localhost:8080`
+- **Cổng Quản trị CSDL pgAdmin 4:** `http://localhost:5050`
+- **Cổng Dịch vụ PostgreSQL:** `localhost:5432`
 
 ---
 
@@ -252,6 +263,7 @@ APP_UPLOAD_MAX_FILE_SIZE=5MB
 Tất cả các phản hồi từ hệ thống đều được bọc trong cấu trúc chuẩn thống nhất `ApiResponse<T>`, tạo sự thuận lợi tối đa cho việc tích hợp phía Client/Frontend:
 
 ### 1. Cấu Trúc Phản Hồi Thành Công (HTTP 200 OK / 201 Created)
+
 ```json
 {
   "success": true,
@@ -285,6 +297,7 @@ Tất cả các phản hồi từ hệ thống đều được bọc trong cấu
 ```
 
 ### 2. Cấu Trúc Phản Hồi Khi Vi Phạm Dữ Liệu Đầu Vào (HTTP 400 Bad Request)
+
 ```json
 {
   "success": false,
@@ -300,6 +313,7 @@ Tất cả các phản hồi từ hệ thống đều được bọc trong cấu
 ```
 
 ### 3. Cấu Trúc Phản Hồi Khi Lỗi Xác Thực (HTTP 401 Unauthorized)
+
 ```json
 {
   "success": false,
@@ -314,39 +328,67 @@ Tất cả các phản hồi từ hệ thống đều được bọc trong cấu
 ## 📡 Đặc Tả Chi Tiết API Endpoints
 
 ### 1. Phân Hệ Xác Thực & Phân Quyền (Authentication - Public)
-| Phương Thức | Điểm Cuối (Endpoint) | Chức Năng | Định Dạng Dữ Liệu Đầu Vào |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/auth/register` | Đăng ký tài khoản người dùng mới | `{"username": "...", "email": "...", "password": "..."}` |
-| `POST` | `/api/v1/auth/login` | Xác thực đăng nhập và nhận JWT Access Token | `{"username": "...", "password": "..."}` |
+
+| Phương Thức | Điểm Cuối (Endpoint)    | Chức Năng                                   | Định Dạng Dữ Liệu Đầu Vào                                |
+| :---------- | :---------------------- | :------------------------------------------ | :------------------------------------------------------- |
+| `POST`      | `/api/v1/auth/register` | Đăng ký tài khoản người dùng mới            | `{"username": "...", "email": "...", "password": "..."}` |
+| `POST`      | `/api/v1/auth/login`    | Xác thực đăng nhập và nhận JWT Access Token | `{"username": "...", "password": "..."}`                 |
 
 ### 2. Phân Hệ Đọc Tin Tức (Public News - Độc Giả)
-*Không yêu cầu đính kèm Token trong Header.*
 
-| Phương Thức | Điểm Cuối (Endpoint) | Chức Năng | Tham Số Truy Vấn (Query Parameters) |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/public/news` | Truy xuất danh sách tin tức đã xuất bản | `page` (default 1), `limit` (default 10), `sortBy` (default `createdAt`), `sortDir` (`asc`/`desc`), `keyword`, `categoryId` |
-| `GET` | `/api/v1/public/news/{slugOrId}` | Xem chi tiết bài viết và **tự động tăng nguyên tử lượt xem** | Path variable: `slug` (ví dụ: `cong-nghe-ai-2026`) hoặc `id` |
+_Không yêu cầu đính kèm Token trong Header._
+
+| Phương Thức | Điểm Cuối (Endpoint)             | Chức Năng                                                    | Tham Số Truy Vấn (Query Parameters)                                                                                         |
+| :---------- | :------------------------------- | :----------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------- |
+| `GET`       | `/api/v1/public/news`            | Truy xuất danh sách tin tức đã xuất bản                      | `page` (default 1), `limit` (default 10), `sortBy` (default `createdAt`), `sortDir` (`asc`/`desc`), `keyword`, `categoryId` |
+| `GET`       | `/api/v1/public/news/{slugOrId}` | Xem chi tiết bài viết và **tự động tăng nguyên tử lượt xem** | Path variable: `slug` (ví dụ: `cong-nghe-ai-2026`) hoặc `id`                                                                |
+
+Query danh sách áp dụng chung cho public/private:
+
+- `page` là số nguyên từ 1; `limit` từ 1 đến 100. Mặc định là trang 1, 10 bài/trang (khai báo trong `AppConstants`).
+- `sortBy` nhận `id`, `title`, `createdAt`, `updatedAt`, `viewCount`; `sortDir` nhận `asc` hoặc `desc`, không phân biệt hoa thường.
+- `keyword` tối đa 200 ký tự, tìm trong tiêu đề hoặc tóm tắt, không phân biệt hoa thường; `%`, `_` và `\` được tìm như ký tự thông thường. Tìm kiếm chưa hỗ trợ bỏ dấu tiếng Việt.
+- `keyword` và `categoryId` được kết hợp khi truyền đồng thời. `categoryId` phải là số nguyên dương; chỉ trả bài đã xuất bản ở API public.
+- Tham số không hợp lệ trả HTTP 400 và lỗi theo tên trường trong `data`. Trang vượt phạm vi trả danh sách rỗng với metadata tổng số bài.
+- Khi giá trị trường sắp xếp bằng nhau, hệ thống dùng `id` làm tiêu chí phụ. Phân trang theo offset vẫn có thể dịch chuyển khi có dữ liệu mới.
 
 ### 3. Phân Hệ Quản Trị Tin Tức (Private News - Quản Trị & Biên Tập)
+
 > **Yêu cầu bảo mật:** Bắt buộc gửi kèm HTTP Header:  
 > `Authorization: Bearer <access_token>`
 
-| Phương Thức | Điểm Cuối (Endpoint) | Chức Năng | Dữ Liệu Yêu Cầu |
-| :--- | :--- | :--- | :--- |
-| `GET` | `/api/v1/admin/news` | Truy vấn danh sách tin quản trị (bao gồm tin ẩn) | Hỗ trợ phân trang, lọc và sắp xếp tương tự Public |
-| `POST` | `/api/v1/admin/news` | Khởi tạo bài viết mới vào hệ thống | `{"title": "...", "summary": "...", "content": "...", "categoryId": 1, "thumbnailUrl": "..."}` |
-| `PUT` | `/api/v1/admin/news/{id}` | Cập nhật thông tin và trạng thái bài viết | `{"title": "...", "content": "...", "isPublished": true, ...}` |
-| `DELETE` | `/api/v1/admin/news/{id}` | Xóa bài viết khỏi cơ sở dữ liệu | Path variable: `id` |
+Quyền `ROLE_USER` và `ROLE_ADMIN` được xem danh sách, tạo và cập nhật tin. Chỉ `ROLE_ADMIN` được xóa tin.
+
+| Phương Thức | Điểm Cuối (Endpoint)      | Chức Năng                                        | Dữ Liệu Yêu Cầu                                                                                |
+| :---------- | :------------------------ | :----------------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `GET`       | `/api/v1/admin/news`      | Truy vấn danh sách tin quản trị (bao gồm tin ẩn) | Hỗ trợ phân trang, lọc và sắp xếp tương tự Public                                              |
+| `POST`      | `/api/v1/admin/news`      | Khởi tạo bài viết mới vào hệ thống               | `{"title": "...", "summary": "...", "content": "...", "categoryId": 1, "thumbnailUrl": "..."}` |
+| `PUT`       | `/api/v1/admin/news/{id}` | Cập nhật thông tin và trạng thái bài viết        | `{"title": "...", "content": "...", "isPublished": true, ...}`                                 |
+| `DELETE`    | `/api/v1/admin/news/{id}` | Xóa bài viết khỏi cơ sở dữ liệu                  | Path variable: `id`                                                                            |
 
 ### 4. Phân Hệ Quản Trị Tệp Tin (File Management - Private)
+
 > **Yêu cầu bảo mật:** Bắt buộc gửi kèm HTTP Header:  
 > `Authorization: Bearer <access_token>`
 
-| Phương Thức | Điểm Cuối (Endpoint) | Chức Năng | Kiểu Nội Dung (Content-Type) |
-| :--- | :--- | :--- | :--- |
-| `POST` | `/api/v1/files/upload` | Tải lên hình ảnh bài viết (Hỗ trợ: `.jpg`, `.png`, `.webp`; Max: 5MB) | `multipart/form-data` (form key: `file`) |
-| `DELETE` | `/api/v1/files/{fileName}` | Xóa tệp tin vật lý khỏi phân vùng lưu trữ | Path variable: `fileName` |
-| `GET` | `/uploads/{fileName}` | Truy cập hoặc tải tệp trực tiếp | *(Tuyến công khai phục vụ hiển thị)* |
+`ROLE_USER` và `ROLE_ADMIN` được upload; chỉ `ROLE_ADMIN` được xóa file.
+
+| Phương Thức | Điểm Cuối (Endpoint)       | Chức Năng                                                             | Kiểu Nội Dung (Content-Type)             |
+| :---------- | :------------------------- | :-------------------------------------------------------------------- | :--------------------------------------- |
+| `POST`      | `/api/v1/files/upload`     | Tải lên hình ảnh bài viết (Hỗ trợ: `.jpg`, `.png`, `.webp`; Max: 5MB) | `multipart/form-data` (form key: `file`) |
+| `DELETE`    | `/api/v1/files/{fileName}` | Xóa tệp tin vật lý khỏi phân vùng lưu trữ                             | Path variable: `fileName`                |
+| `GET`       | `/uploads/{fileName}`      | Truy cập hoặc tải tệp trực tiếp                                       | _(Tuyến công khai phục vụ hiển thị)_     |
+
+### Postman Collection
+
+Import file `docs/postman/news-management.postman_collection.json` vào Postman. Đặt `baseUrl` nếu server chạy ở địa chỉ khác `http://localhost:8080`.
+
+1. Gọi `Auth → Login (seed admin)` khi database đã được khởi tạo bằng `DataSeeder`.
+2. Sao chép `data.accessToken` trong response đăng nhập vào collection variable `accessToken`.
+3. Gọi các request trong nhóm `Private News` hoặc `Private Files`; request public không cần token.
+4. Với upload, chọn một file tại máy trong phần form-data. Để xóa file, điền `fileName` bằng tên file được API upload trả về.
+
+Các biến `categoryId`, `newsId` và `slugOrId` có giá trị mẫu; cập nhật chúng theo dữ liệu trong database trước khi gọi request tương ứng.
 
 ---
 
@@ -355,12 +397,14 @@ Tất cả các phản hồi từ hệ thống đều được bọc trong cấu
 Khi hệ thống được khởi chạy lần đầu tiên trên một cơ sở dữ liệu trống, cơ chế `DataSeeder` sẽ tự động khởi tạo dữ liệu mẫu nhằm phục vụ công tác kiểm thử tức thì:
 
 ### 1. Tài Khoản Quản Trị & Tác Giả
-| Tên Đăng Nhập | Mật Khẩu Khởi Tạo | Vai Trò Hệ Thống | Phạm Vi Quyền Hạn |
-| :--- | :--- | :--- | :--- |
-| `admin` | `admin123` | `ROLE_ADMIN` | Toàn quyền quản trị nội dung và hệ thống |
-| `author` | `author123` | `ROLE_USER` | Tác giả biên soạn và xuất bản tin tức |
+
+| Tên Đăng Nhập | Mật Khẩu Khởi Tạo | Vai Trò Hệ Thống | Phạm Vi Quyền Hạn                        |
+| :------------ | :---------------- | :--------------- | :--------------------------------------- |
+| `admin`       | `admin123`        | `ROLE_ADMIN`     | Toàn quyền quản trị nội dung và hệ thống |
+| `author`      | `author123`       | `ROLE_USER`      | Tác giả biên soạn và xuất bản tin tức    |
 
 ### 2. Danh Mục Khởi Tạo Sẵn
-*   **Công nghệ** (Slug: `cong-nghe`)
-*   **Thời sự** (Slug: `thoi-su`)
-*   **Giáo dục UTH** (Slug: `giao-duc-uth`)
+
+- **Công nghệ** (Slug: `cong-nghe`)
+- **Thời sự** (Slug: `thoi-su`)
+- **Giáo dục UTH** (Slug: `giao-duc-uth`)
