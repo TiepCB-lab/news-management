@@ -1,7 +1,7 @@
 # ==========================================
 # STAGE 1: Build source code bằng Maven
 # ==========================================
-FROM maven:3.9-eclipse-temurin-17-alpine AS builder
+FROM maven:3.9-eclipse-temurin-25-alpine AS builder
 
 WORKDIR /build
 
@@ -14,9 +14,9 @@ COPY src ./src
 RUN mvn clean package -DskipTests
 
 # ==========================================
-# STAGE 2: Chạy ứng dụng với JRE 17 siêu nhẹ
+# STAGE 2: Chạy ứng dụng với JRE 25
 # ==========================================
-FROM eclipse-temurin:17-jre-alpine
+FROM eclipse-temurin:25-jre-alpine
 
 WORKDIR /app
 

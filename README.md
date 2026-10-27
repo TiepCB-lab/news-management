@@ -27,7 +27,7 @@ Hệ thống được thiết kế theo tiêu chuẩn công nghiệp nhằm đ�
 
 | Phân Hệ                    | Công Nghệ Áp Dụng               | Mô Tả Kỹ Thuật                                                                             |
 | :------------------------- | :------------------------------ | :----------------------------------------------------------------------------------------- |
-| **Nền Tảng Cốt Lõi**       | Java 17 LTS + Spring Boot 3.3.4 | Nền tảng hướng đối tượng strongly-typed, tối ưu hóa bộ nhớ và luồng thực thi.              |
+| **Nền Tảng Cốt Lõi**       | Java 25 LTS + Spring Boot 3.5.16 | Biên dịch và chạy bằng JDK 25. |
 | **Bảo Mật & Phân Quyền**   | Spring Security 6 + JJWT 0.12.6 | Cơ chế xác thực phi trạng thái (Stateless Session) sử dụng thuật toán HMAC-SHA256.         |
 | **Lưu Trữ Dữ Liệu**        | PostgreSQL 16 Alpine            | Cơ sở dữ liệu quan hệ mã nguồn mở mạnh mẽ, hỗ trợ đánh chỉ mục B-tree và Full-Text Search. |
 | **Tầng Ánh Xạ Đối Tượng**  | Spring Data JPA + Hibernate 6   | Quản trị giao dịch tự động (Declarative Transactions), Auditing thời gian thực.            |
@@ -44,7 +44,7 @@ Dự án áp dụng mô hình **Clean Layered Architecture**, phân tách độc
 ```text
 news-management/
 ├── docker-compose.yml                          # Điều phối dịch vụ (App + PostgreSQL 16 + pgAdmin 4)
-├── Dockerfile                                  # Multi-stage container build (Maven compile -> JRE 17 runtime)
+├── Dockerfile                                  # Multi-stage container build (Maven/JDK 25 -> JRE 25 runtime)
 ├── .dockerignore                               # Loại bỏ artifacts không cần thiết khi đóng gói container
 ├── .env.example                                # Bản mẫu khai báo biến môi trường chuẩn
 ├── .env                                        # Tệp biến môi trường cục bộ (được cô lập khỏi VCS)
@@ -118,7 +118,7 @@ Hệ thống được xây dựng dựa trên sự phối hợp chặt chẽ gi�
 
 _Chịu trách nhiệm về Kiến trúc hệ thống, Chuẩn hóa API, Bảo mật tầng mạng và Hạ tầng triển khai._
 
-- [x] Thiết kế khung kiến trúc tổng thể dự án trên nền tảng Spring Boot 3.3.4 và Java 17.
+- [x] Thiết kế khung kiến trúc dự án Spring Boot; hiện dùng Spring Boot 3.5.16 và Java 25.
 - [x] Đóng gói và thiết lập quy trình Container hóa với Dockerfile (Multi-stage) và Docker Compose.
 - [x] Thiết lập cơ chế cấu hình động qua biến môi trường (`.env`, `application.yml`).
 - [x] Chuẩn hóa định dạng trao đổi dữ liệu toàn cục (`ApiResponse<T>`, `PaginationMeta`).
@@ -155,6 +155,8 @@ _Chịu trách nhiệm về Thiết kế CSDL, Tối ưu hóa truy vấn, Đánh
 
 Dự án cung cấp 2 quy trình vận hành tiêu chuẩn, đáp ứng linh hoạt cho giai đoạn phát triển cũng như đánh giá chất lượng:
 
+Nếu chưa có `.env`, sao chép `.env.example` thành `.env` trong thư mục gốc dự án trước khi chạy. Khi chạy local bằng IDE/Maven, Spring đọc file này từ thư mục làm việc; Docker Compose truyền cấu hình cho container qua `environment`.
+
 ### Quy trình 1: Môi Trường Phát Triển Cục Bộ (Local Development Workflow)
 
 > **Mục tiêu:** Tách biệt CSDL vào container để đảm bảo tính cô lập, đồng thời cho phép Kỹ sư Backend tận dụng tính năng Debug, Hot-reload và thực thi nhanh chóng trên IDE máy trạm.
@@ -164,6 +166,7 @@ Dự án cung cấp 2 quy trình vận hành tiêu chuẩn, đáp ứng linh ho�
    docker compose up -d postgres pgadmin
    ```
 2. **Khởi chạy ứng dụng Backend trên máy trạm:**
+   - Cài JDK 25 và Maven; chọn JDK 25 trong IDE và `JAVA_HOME`. Kiểm tra bằng `java -version` và `mvn -version` trước khi chạy. Artifact được biên dịch với `release 25`, cần Java 25 trở lên để chạy.
    - Thực thi trực tiếp từ IDE (IntelliJ IDEA / VS Code) bằng cách chạy class `NewsManagementApplication.java`.
    - Hoặc thực thi qua giao diện dòng lệnh Maven:
      ```powershell
@@ -210,7 +213,7 @@ Sau khi cụm dịch vụ khởi động hoàn tất, các cổng giao tiếp đ
 
 ## ⚙️ Cấu Hình Môi Trường Thực Thi (.env)
 
-Hệ thống tuân thủ nguyên tắc **The Twelve-Factor App**, tách biệt hoàn toàn cấu hình khỏi mã nguồn:
+Các cấu hình dưới đây có thể đặt trong `.env` hoặc biến môi trường của tiến trình. Biến môi trường của tiến trình được ưu tiên hơn `.env`. File dùng dạng `KEY=value`, không dùng `export`, không bọc giá trị bằng dấu nháy; đường dẫn Windows nên dùng dấu `/` (ví dụ `D:/news/uploads`).
 
 ```env
 # ==========================================
@@ -231,8 +234,8 @@ SPRING_DATASOURCE_USERNAME=postgres
 SPRING_DATASOURCE_PASSWORD=postgres123
 SPRING_JPA_DATABASE_PLATFORM=org.hibernate.dialect.PostgreSQLDialect
 
-# Đồng bộ schema thực thể
-SPRING_JPA_HIBERNATE_DDL_AUTO=update
+# Flyway tạo schema; Hibernate kiểm tra mapping
+SPRING_JPA_HIBERNATE_DDL_AUTO=validate
 SPRING_JPA_SHOW_SQL=true
 
 # ==========================================
@@ -254,7 +257,11 @@ JWT_EXPIRATION_MS=86400000
 # ==========================================
 APP_UPLOAD_DIR=./uploads
 APP_UPLOAD_MAX_FILE_SIZE=5MB
+APP_UPLOAD_MAX_REQUEST_SIZE=10MB
+APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
+
+`APP_CORS_ALLOWED_ORIGINS` là danh sách origin phân tách bằng dấu phẩy; trình duyệt được phép gửi Bearer token từ các origin này. CORS không cấp quyền truy cập API và không thay thế JWT. Với Docker, `SERVER_PORT` chọn cổng trên máy host; container vẫn nghe ở cổng 8080.
 
 ---
 
@@ -329,6 +336,11 @@ Tất cả các phản hồi từ hệ thống đều được bọc trong cấu
 
 ### 1. Phân Hệ Xác Thực & Phân Quyền (Authentication - Public)
 
+- Username được bỏ khoảng trắng hai đầu, dài 3–50 ký tự; chỉ nhận chữ, số, `_`, `.` và `-`. Username phân biệt hoa thường và không chứa `@` để tránh trùng với cách đăng nhập bằng email.
+- Email được bỏ khoảng trắng hai đầu và chuyển chữ thường, tối đa 100 ký tự. Có thể đăng nhập bằng username hoặc email trong trường `username`.
+- Mật khẩu giữ nguyên khoảng trắng, tối thiểu 6 ký tự, tối đa 72 byte UTF-8 theo giới hạn BCrypt.
+- Đăng ký trùng username/email trả HTTP 409, dữ liệu không hợp lệ trả 400; đăng nhập sai hoặc token không hợp lệ trả 401 ở API private. Tài khoản đăng ký mới luôn là `ROLE_USER`.
+
 | Phương Thức | Điểm Cuối (Endpoint)    | Chức Năng                                   | Định Dạng Dữ Liệu Đầu Vào                                |
 | :---------- | :---------------------- | :------------------------------------------ | :------------------------------------------------------- |
 | `POST`      | `/api/v1/auth/register` | Đăng ký tài khoản người dùng mới            | `{"username": "...", "email": "...", "password": "..."}` |
@@ -359,6 +371,8 @@ Query danh sách áp dụng chung cho public/private:
 
 Quyền `ROLE_USER` và `ROLE_ADMIN` được xem danh sách, tạo và cập nhật tin. Chỉ `ROLE_ADMIN` được xóa tin.
 
+`USER` hiện là biên tập viên dùng chung: quyền sửa áp dụng cho mọi bài viết, chưa giới hạn theo tác giả.
+
 | Phương Thức | Điểm Cuối (Endpoint)      | Chức Năng                                        | Dữ Liệu Yêu Cầu                                                                                |
 | :---------- | :------------------------ | :----------------------------------------------- | :--------------------------------------------------------------------------------------------- |
 | `GET`       | `/api/v1/admin/news`      | Truy vấn danh sách tin quản trị (bao gồm tin ẩn) | Hỗ trợ phân trang, lọc và sắp xếp tương tự Public                                              |
@@ -373,9 +387,11 @@ Quyền `ROLE_USER` và `ROLE_ADMIN` được xem danh sách, tạo và cập nh
 
 `ROLE_USER` và `ROLE_ADMIN` được upload; chỉ `ROLE_ADMIN` được xóa file.
 
+Upload kiểm tra đuôi và chữ ký đầu file, không tin MIME type do client gửi. File rỗng/sai định dạng trả 400; vượt kích thước trả 413. Chỉ kiểm tra chữ ký chưa phải giải mã toàn bộ ảnh hay quét mã độc; phạm vi hiện tại phục vụ bài tập/demo local.
+
 | Phương Thức | Điểm Cuối (Endpoint)       | Chức Năng                                                             | Kiểu Nội Dung (Content-Type)             |
 | :---------- | :------------------------- | :-------------------------------------------------------------------- | :--------------------------------------- |
-| `POST`      | `/api/v1/files/upload`     | Tải lên hình ảnh bài viết (Hỗ trợ: `.jpg`, `.png`, `.webp`; Max: 5MB) | `multipart/form-data` (form key: `file`) |
+| `POST`      | `/api/v1/files/upload`     | Tải lên ảnh `.jpg`, `.jpeg`, `.png`, `.webp`, `.gif`; mặc định tối đa 5MB/file và 10MB/request | `multipart/form-data` (form key: `file`) |
 | `DELETE`    | `/api/v1/files/{fileName}` | Xóa tệp tin vật lý khỏi phân vùng lưu trữ                             | Path variable: `fileName`                |
 | `GET`       | `/uploads/{fileName}`      | Truy cập hoặc tải tệp trực tiếp                                       | _(Tuyến công khai phục vụ hiển thị)_     |
 

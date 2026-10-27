@@ -4,6 +4,8 @@ server:
     context-path: /
 
 spring:
+  config:
+    import: optional:file:.env[.properties]
   application:
     name: news-management
 
@@ -48,9 +50,5 @@ app:
   # Cấu hình Upload File
   upload:
     dir: ${APP_UPLOAD_DIR:./uploads}
-    allowed-extensions:
-      - .jpg
-      - .jpeg
-      - .png
-      - .webp
-      - .gif
+  cors:
+    allowed-origins: ${APP_CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:5173}
