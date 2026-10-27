@@ -8,6 +8,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Locale;
+
 @Service
 public class CustomUserDetailsService implements UserDetailsService {
 
@@ -22,7 +24,7 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String usernameOrEmail) throws UsernameNotFoundException {
         // Cho phép đăng nhập bằng cả username hoặc email
         User user = userRepository.findByUsername(usernameOrEmail)
-                .or(() -> userRepository.findByEmail(usernameOrEmail))
+                .or(() -> userRepository.findByEmail(usernameOrEmail.toLowerCase(Locale.ROOT)))
                 .orElseThrow(() -> new UsernameNotFoundException("Không tìm thấy người dùng với: " + usernameOrEmail));
 
         return UserPrincipal.create(user);
