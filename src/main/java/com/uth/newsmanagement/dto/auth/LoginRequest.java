@@ -14,7 +14,7 @@ public class LoginRequest {
     }
 
     public LoginRequest(String username, String password) {
-        this.username = username;
+        setUsername(username);
         this.password = password;
     }
 
@@ -23,7 +23,7 @@ public class LoginRequest {
     }
 
     public void setUsername(String username) {
-        this.username = username;
+        this.username = username == null ? null : username.trim();
     }
 
     public String getPassword() {
