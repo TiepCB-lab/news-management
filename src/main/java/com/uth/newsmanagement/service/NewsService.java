@@ -12,7 +12,6 @@ import com.uth.newsmanagement.repository.NewsRepository;
 import com.uth.newsmanagement.repository.NewsSpecifications;
 import com.uth.newsmanagement.repository.UserRepository;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -48,36 +47,11 @@ public class NewsService {
 
     /**
      * Lấy danh sách tin tức đã xuất bản, hỗ trợ tìm kiếm và lọc theo chuyên mục.
-     *
-     * <p>
-     * Chiến lược tìm kiếm theo từ khóa:
-     * <ul>
-     * <li>Keyword ≥ 2 ký tự → dùng {@code PostgreSQL Full-Text Search} (GIN index,
-     * O(log N))</li>
-     * <li>Keyword = 1 ký tự → fallback {@code LIKE} (tránh lỗi tsquery với chuỗi
-     * đơn)</li>
-     * </ul>
      */
     @Transactional(readOnly = true)
     public Page<NewsResponse> getPublicNews(Pageable pageable, String keyword, Long categoryId) {
-        Page<News> newsPage;
-        if (StringUtils.hasText(keyword)) {
-            String trimmed = keyword.trim();
-            // Sử dụng FTS khi keyword đủ dài (>=2 ký tự) để tận dụng GIN index
-            if (trimmed.length() >= 2) {
-                // Native FTS query đã có ORDER BY ts_rank riêng, truyền Pageable không sort để
-                // tránh xung đột ORDER BY
-                Pageable ftsPageable = PageRequest.of(pageable.getPageNumber(), pageable.getPageSize());
-                newsPage = newsRepository.fullTextSearchPublicNews(trimmed, ftsPageable);
-            } else {
-                // Fallback LIKE cho keyword 1 ký tự
-                newsPage = newsRepository.searchPublicNewsLike(trimmed, pageable);
-            }
-        } else if (categoryId != null) {
-            newsPage = newsRepository.findByCategoryIdAndIsPublishedTrue(categoryId, pageable);
-        } else {
-            newsPage = newsRepository.findByIsPublishedTrue(pageable);
-        }
+        Page<News> newsPage = newsRepository.findAll(
+                NewsSpecifications.matching(keyword, categoryId, true), pageable);
         return newsPage.map(NewsResponse::fromEntity);
     }
 
