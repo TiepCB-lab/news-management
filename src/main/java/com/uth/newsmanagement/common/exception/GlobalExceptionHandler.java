@@ -12,6 +12,13 @@ import org.springframework.web.method.annotation.MethodArgumentTypeMismatchExcep
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.multipart.MaxUploadSizeExceededException;
+import org.springframework.web.multipart.MultipartException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +29,8 @@ import java.util.Map;
  */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
+
+    private static final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
     // 1. Xử lý lỗi validate DTO (@Valid, @NotBlank, @Size, @Email,...)
     @ExceptionHandler(BindException.class)
@@ -38,9 +47,22 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
     }
 
-    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class})
+    @ExceptionHandler({MethodArgumentTypeMismatchException.class, HttpMessageNotReadableException.class,
+            MissingServletRequestPartException.class, MissingServletRequestParameterException.class,
+            MultipartException.class})
     public ResponseEntity<ApiResponse<Void>> handleMalformedRequest(Exception ex) {
         return ResponseEntity.badRequest().body(ApiResponse.error(400, "Dữ liệu gửi lên không đúng định dạng"));
+    }
+
+    @ExceptionHandler(HttpMediaTypeNotSupportedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleUnsupportedMediaType(HttpMediaTypeNotSupportedException ex) {
+        return ResponseEntity.status(HttpStatus.UNSUPPORTED_MEDIA_TYPE)
+                .body(ApiResponse.error(415, "Content-Type không được hỗ trợ"));
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<ApiResponse<Void>> handleMissingResource(NoResourceFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ApiResponse.error(404, "Không tìm thấy tài nguyên"));
     }
 
     // 2. Xử lý Custom AppException (ResourceNotFound, BadRequest, ...)
@@ -73,11 +95,11 @@ public class GlobalExceptionHandler {
 
     // 6. Xử lý mọi lỗi không mong muốn còn lại (500 Internal Server Error)
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ApiResponse<String>> handleGlobalException(Exception ex) {
-        ApiResponse<String> response = ApiResponse.error(
+    public ResponseEntity<ApiResponse<Void>> handleGlobalException(Exception ex) {
+        logger.error("Lỗi chưa được xử lý", ex);
+        ApiResponse<Void> response = ApiResponse.error(
                 HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Đã xảy ra lỗi nội bộ máy chủ",
-                ex.getMessage()
+                "Đã xảy ra lỗi nội bộ máy chủ"
         );
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
     }
