@@ -39,7 +39,6 @@ public class News extends BaseEntity {
     @Column(length = 500)
     private String summary;
 
-    @Lob
     @Column(columnDefinition = "TEXT", nullable = false)
     private String content;
 
