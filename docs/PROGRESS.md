@@ -8,7 +8,7 @@ Chia phần còn lại thành 3 đợt; mỗi đợt hoàn thiện một nhóm v
 | --- | --- | --- |
 | 1 — 26/10/2026 | Tìm kiếm, lọc, phân trang, sắp xếp, đọc tin và kiểm tra hồi quy | Hoàn thành |
 | 2 — 27/10/2026 | Hoàn thiện đăng ký/đăng nhập, quyền truy cập, cấu hình môi trường và upload/xóa file | Hoàn thành |
-| 3 | Hoàn thiện tài liệu API, dữ liệu demo, kiểm tra luồng theo đề và hướng dẫn bàn giao | Chưa thực hiện |
+| 3 — 09/11/2026 | Hoàn thiện tài liệu API, dữ liệu demo, kiểm tra luồng theo đề và hướng dẫn bàn giao | Hoàn thành |
 
 ## Đợt 1
 
@@ -38,13 +38,15 @@ Kết quả ngày 27/10/2026: `mvn clean test` thành công, **69/69 ca qua**, 0
 
 Đánh giá skill và phạm vi rà soát được ghi tại [PONYTAIL_EVALUATION.md](PONYTAIL_EVALUATION.md).
 
-## Tiêu chí đợt 3
+## Đợt 3 — bàn giao ngày 09/11/2026
 
-- Hướng dẫn khởi chạy từ bản sao dự án mới; giải thích rõ các biến môi trường và hằng số dùng chung.
-- Hoàn thiện tài liệu API/Postman và mục Swagger còn lại trong WBS; tài liệu phản ánh đúng code.
-- Có dữ liệu mẫu đủ trình diễn tìm kiếm/sắp xếp/phân trang.
-- Chạy luồng: đăng ký → đăng nhập → thêm tin → public đọc tin → sửa/tìm kiếm/sắp xếp → xóa tin; upload → lấy URL → xóa file.
-- Ghi kết quả kiểm tra và các giới hạn còn lại trước khi đánh dấu hoàn thành.
+- Hoàn thiện hướng dẫn chạy local/Docker, cấu hình cổng PostgreSQL và mô tả các hằng số dùng chung.
+- Tích hợp Swagger UI/OpenAPI; kiểm tra Bearer cho API private, query lọc, upload multipart và mã 201 của các API tạo mới.
+- Postman tự lưu token, ID tin và tên file khi request thành công; kiểm tra collection parse JSON thành công.
+- Build image Temurin Java 25 và khởi chạy Docker Compose với PostgreSQL **16.15** trống trong stack riêng. Flyway áp dụng thành công V1 và V2, Hibernate xác thực schema; nội dung tin được ánh xạ với cột `TEXT`.
+- Seed 40 bài viết, 3 chuyên mục, 2 tài khoản demo. Chạy [script kiểm tra HTTP](../scripts/smoke.ps1) thành công: đăng ký/đăng nhập, tin nháp không public, tạo/sửa/đọc/xóa, lọc/tìm kiếm/sắp xếp/phân trang, kiểm tra USER không được xóa, upload/đọc/xóa ảnh. Sau khi script dọn tin thử, database vẫn có 40 bài mẫu.
+- `mvn clean verify --batch-mode --no-transfer-progress`: **69/69 ca đạt** trên Java 25; đã tạo JAR. `docker compose config --quiet` và `git diff --check` thành công.
+- Đã dọn stack và volume thử nghiệm. Phạm vi bàn giao là bài tập/demo local; không kiểm tra tải lớn hoặc quét mã độc trong file.
 
 ## Chuyển sang Java 25 — 27/10/2026
 

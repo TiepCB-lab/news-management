@@ -2,9 +2,18 @@
 
 > **Học Kỳ Doanh Nghiệp - Trường Đại Học Giao Thông Vận Tải TP.HCM (UTH)**  
 > **Tài Liệu Đặc Tả Kỹ Thuật, Kiến Trúc Hệ Thống & Hướng Dẫn Vận Hành**  
-> _Trạng thái: Đang hoàn thiện theo yêu cầu bài tập | Kiến trúc: Layered Architecture_
+> _Trạng thái: Đã hoàn thành và kiểm tra luồng bàn giao Nhiệm vụ 17 | Kiến trúc: Layered Architecture_
 
-Theo dõi các đợt hoàn thiện và tiêu chí bàn giao tại [Tiến độ dự án](docs/PROGRESS.md).
+Xem kết quả kiểm tra và phạm vi bàn giao tại [Tiến độ dự án](docs/PROGRESS.md).
+
+### Chạy nhanh với Docker
+
+```powershell
+if (-not (Test-Path .env)) { Copy-Item .env.example .env }
+docker compose up --build -d app
+```
+
+Mở `http://localhost:8080/swagger-ui/index.html` khi backend khởi động xong. Nếu cổng PostgreSQL 5432 đang bận, đặt `POSTGRES_PORT=5433` trong `.env` trước khi chạy.
 
 ---
 
@@ -129,7 +138,7 @@ _Chịu trách nhiệm về Kiến trúc hệ thống, Chuẩn hóa API, Bảo m
 - [x] Xây dựng API Đăng nhập và quản trị vòng đời của Access Token.
 - [x] Xây dựng phân hệ Upload và Xóa tệp tin tĩnh với cơ chế kiểm tra định dạng và chống tấn công Path Traversal.
 - [x] Tạo Postman Collection mẫu để gọi các API chính.
-- [ ] **TODO: [BACKEND]** Bổ sung tài liệu tương tác qua OpenAPI/Swagger.
+- [x] Bổ sung OpenAPI/Swagger UI và xác thực Bearer cho nhóm API private.
 - [x] Cấu hình phân quyền theo Role cho thao tác quản lý tin và file.
 
 ---
@@ -144,7 +153,7 @@ _Chịu trách nhiệm về Thiết kế CSDL, Tối ưu hóa truy vấn, Đánh
 - [x] Triển khai lớp `DataSeeder` tự động nạp dữ liệu danh mục và tài khoản mẫu khi khởi động hệ thống.
 - [x] Xây dựng `NewsRepository` tích hợp phân trang (`Pageable`), sắp xếp đa tiêu chí và đếm lượt xem nguyên tử.
 - [x] Xây dựng các dịch vụ nghiệp vụ tin tức tại `NewsService` và điều phối tại Controllers.
-- [x] **[DATA]** Tối ưu hóa câu truy vấn tìm kiếm toàn văn: Ứng dụng **PostgreSQL Full-Text Search** (`to_tsvector`, `to_tsquery`) hoặc triển khai dynamic query với `JpaSpecificationExecutor`.
+- [x] **[DATA]** Dùng `JpaSpecificationExecutor` để kết hợp từ khóa, danh mục và trạng thái xuất bản. Migration có index Full-Text Search; API hiện tìm theo chuỗi trong tiêu đề/tóm tắt.
 - [x] **[DATA]** Tối ưu hóa chiến lược đánh chỉ mục (Indexing Strategy) trên các trường: `created_at`, `view_count`, `category_id`, `is_published` để đảm bảo độ trễ truy vấn thấp khi khối lượng bản ghi tăng trưởng lớn.
 - [x] **[DATA]** Mở rộng bộ dữ liệu mẫu (Seeder): Sinh tập dữ liệu giả lập từ 30 - 50 bài viết thực tế với đa dạng chủ đề phục vụ đo kiểm hiệu năng sắp xếp và phân trang.
 - [x] **[DATA]** (Mở rộng nâng cao): Thay thế cơ chế `ddl-auto: update` bằng công cụ quản trị phiên bản schema chuyên nghiệp (**Flyway Migration**).
@@ -177,8 +186,8 @@ Nếu chưa có `.env`, sao chép `.env.example` thành `.env` trong thư mục 
    - Tài khoản đăng nhập: `admin@uth.edu.vn` | Mật khẩu: `admin123`
    - Cấu hình kết nối tới CSDL:
      - **Name:** `News Production DB`
-     - **Host name/address:** `localhost` (hoặc `postgres` nếu kết nối nội bộ giữa các container)
-     - **Port:** `5432`
+     - **Host name/address:** `postgres` (pgAdmin chạy trong cùng mạng Docker Compose)
+     - **Port:** `5432` (cổng trong container)
      - **Maintenance database:** `news_management_db`
      - **Username:** `postgres`
      - **Password:** `postgres123`
@@ -191,7 +200,7 @@ Nếu chưa có `.env`, sao chép `.env.example` thành `.env` trong thư mục 
 
 ```powershell
 # 1. Tự động biên dịch mã nguồn đa tầng và khởi chạy cụm containers:
-docker compose up --build -d
+docker compose up --build -d app
 
 # 2. Giám sát nhật ký hoạt động (Logs) của ứng dụng theo thời gian thực:
 docker compose logs -f app
@@ -206,7 +215,7 @@ docker compose down -v
 Sau khi cụm dịch vụ khởi động hoàn tất, các cổng giao tiếp được phân bổ như sau:
 
 - **Cổng RESTful API Backend:** `http://localhost:8080`
-- **Cổng Quản trị CSDL pgAdmin 4:** `http://localhost:5050`
+- **Cổng Quản trị CSDL pgAdmin 4:** `http://localhost:5050` nếu chạy thêm `docker compose up -d pgadmin`.
 - **Cổng Dịch vụ PostgreSQL:** `localhost:5432`
 
 ---
@@ -225,6 +234,7 @@ SERVER_PORT=8080
 # CẤU HÌNH DỊCH VỤ CSDL POSTGRESQL 16
 # ==========================================
 POSTGRES_DB=news_management_db
+POSTGRES_PORT=5432
 POSTGRES_USER=postgres
 POSTGRES_PASSWORD=postgres123
 
@@ -262,6 +272,10 @@ APP_CORS_ALLOWED_ORIGINS=http://localhost:3000,http://localhost:5173
 ```
 
 `APP_CORS_ALLOWED_ORIGINS` là danh sách origin phân tách bằng dấu phẩy; trình duyệt được phép gửi Bearer token từ các origin này. CORS không cấp quyền truy cập API và không thay thế JWT. Với Docker, `SERVER_PORT` chọn cổng trên máy host; container vẫn nghe ở cổng 8080.
+
+Compose chỉ mở các cổng trên localhost cho demo. Nếu máy đã dùng cổng 5432, đặt `POSTGRES_PORT=5433`; khi chạy Spring trên host, đổi cả cổng trong `SPRING_DATASOURCE_URL` thành 5433. Khi chạy cả backend bằng Compose, backend kết nối nội bộ qua `postgres:5432`.
+
+Các hằng số dùng chung nằm trong `AppConstants`: mặc định trang 1, 10 bài mỗi trang, tối đa 100, sắp xếp `createdAt desc`, và tiền tố Bearer. Cấu hình môi trường được đọc trong `application.yml`.
 
 ---
 
@@ -395,16 +409,27 @@ Upload kiểm tra đuôi và chữ ký đầu file, không tin MIME type do clie
 | `DELETE`    | `/api/v1/files/{fileName}` | Xóa tệp tin vật lý khỏi phân vùng lưu trữ                             | Path variable: `fileName`                |
 | `GET`       | `/uploads/{fileName}`      | Truy cập hoặc tải tệp trực tiếp                                       | _(Tuyến công khai phục vụ hiển thị)_     |
 
-### Postman Collection
+### Swagger UI và Postman
+
+- Mở Swagger UI tại `http://localhost:8080/swagger-ui/index.html`; OpenAPI JSON ở `/v3/api-docs`. Tài liệu được sinh từ controller bằng [springdoc-openapi 2.8.17](https://github.com/springdoc/springdoc-openapi/releases/tag/v2.8.17).
+- Gọi `POST /api/v1/auth/login`, lấy `data.accessToken`, bấm **Authorize** và dán token (Swagger tự thêm `Bearer`). Tài khoản `ROLE_USER` có thể tạo/sửa tin và upload, chỉ `ROLE_ADMIN` được xóa.
 
 Import file `docs/postman/news-management.postman_collection.json` vào Postman. Đặt `baseUrl` nếu server chạy ở địa chỉ khác `http://localhost:8080`.
 
 1. Gọi `Auth → Login (seed admin)` khi database đã được khởi tạo bằng `DataSeeder`.
-2. Sao chép `data.accessToken` trong response đăng nhập vào collection variable `accessToken`.
-3. Gọi các request trong nhóm `Private News` hoặc `Private Files`; request public không cần token.
-4. Với upload, chọn một file tại máy trong phần form-data. Để xóa file, điền `fileName` bằng tên file được API upload trả về.
+2. Collection tự lưu `accessToken` khi đăng nhập thành công.
+3. Chọn `categoryId` từ danh sách tin public. Gọi **Create news** trước khi sửa/xóa; collection tự lưu ID bài vừa tạo.
+4. Chọn ảnh ở form-data rồi gọi **Upload image**. Collection lưu `fileName` cho request đọc/xóa file.
 
-Các biến `categoryId`, `newsId` và `slugOrId` có giá trị mẫu; cập nhật chúng theo dữ liệu trong database trước khi gọi request tương ứng.
+### Kiểm tra luồng bàn giao
+
+Sau khi backend khởi động với dữ liệu mẫu, chạy bằng PowerShell 7:
+
+```powershell
+pwsh -File scripts/smoke.ps1 -BaseUrl http://localhost:8080
+```
+
+Script kiểm tra Swagger, auth, phân quyền, CRUD tin, lọc/sắp xếp/phân trang, và upload–đọc–xóa ảnh qua HTTP. Dùng database demo: script dọn tin và ảnh do nó tạo, còn tài khoản đăng ký dùng để kiểm tra sẽ ở lại vì API không có chức năng xóa tài khoản. Có thể truyền `-AdminUsername` và `-AdminPassword` nếu đã đổi tài khoản demo.
 
 ---
 
@@ -424,3 +449,5 @@ Khi hệ thống được khởi chạy lần đầu tiên trên một cơ sở 
 - **Công nghệ** (Slug: `cong-nghe`)
 - **Thời sự** (Slug: `thoi-su`)
 - **Giáo dục UTH** (Slug: `giao-duc-uth`)
+
+Cơ sở dữ liệu trống được tạo 40 bài mẫu thuộc ba chuyên mục; có tin nháp để trình diễn sự khác nhau giữa danh sách public và private.
