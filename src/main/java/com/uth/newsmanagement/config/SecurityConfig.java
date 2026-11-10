@@ -86,6 +86,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/v1/public/**").permitAll()
                 // Public APIs: Xem file/ảnh upload tĩnh
                 .requestMatchers("/uploads/**").permitAll()
+                .requestMatchers("/v3/api-docs", "/v3/api-docs.yaml", "/v3/api-docs/swagger-config",
+                        "/swagger-ui.html", "/swagger-ui/**").permitAll()
                 // Cho phép trang lỗi mặc định của Spring
                 .requestMatchers("/error").permitAll()
                 // Tất cả các API còn lại (CRUD tin tức, upload/xóa file) bắt buộc phải có Token

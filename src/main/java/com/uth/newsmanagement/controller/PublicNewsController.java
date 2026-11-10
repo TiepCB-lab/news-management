@@ -6,6 +6,7 @@ import com.uth.newsmanagement.dto.news.NewsResponse;
 import com.uth.newsmanagement.dto.news.NewsQueryRequest;
 import com.uth.newsmanagement.service.NewsService;
 import jakarta.validation.Valid;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -30,7 +31,7 @@ public class PublicNewsController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<NewsResponse>>> getPublicNews(
-            @Valid @ModelAttribute NewsQueryRequest query
+            @ParameterObject @Valid @ModelAttribute NewsQueryRequest query
     ) {
         Page<NewsResponse> resultPage = newsService.getPublicNews(
                 query.toPageable(), query.getKeyword(), query.getCategoryId());

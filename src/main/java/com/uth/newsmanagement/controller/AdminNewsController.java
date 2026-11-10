@@ -8,6 +8,8 @@ import com.uth.newsmanagement.dto.news.NewsQueryRequest;
 import com.uth.newsmanagement.dto.news.NewsUpdateRequest;
 import com.uth.newsmanagement.service.NewsService;
 import jakarta.validation.Valid;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,6 +26,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1/admin/news")
 @PreAuthorize("hasAnyRole('USER', 'ADMIN')")
+@SecurityRequirement(name = "bearerAuth")
 public class AdminNewsController {
 
     private final NewsService newsService;
@@ -37,7 +40,7 @@ public class AdminNewsController {
      */
     @GetMapping
     public ResponseEntity<ApiResponse<List<NewsResponse>>> getAdminNews(
-            @Valid @ModelAttribute NewsQueryRequest query
+            @ParameterObject @Valid @ModelAttribute NewsQueryRequest query
     ) {
         Page<NewsResponse> resultPage = newsService.getAdminNews(
                 query.toPageable(), query.getKeyword(), query.getCategoryId());
@@ -61,6 +64,7 @@ public class AdminNewsController {
      * API Private: Thêm mới tin tức
      */
     @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<ApiResponse<NewsResponse>> createNews(
             @Valid @RequestBody NewsCreateRequest request,
             Authentication authentication
