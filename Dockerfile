@@ -5,13 +5,9 @@ FROM maven:3.9-eclipse-temurin-25-alpine AS builder
 
 WORKDIR /build
 
-# Copy file pom.xml để tải dependencies trước (tận dụng Docker cache layer)
 COPY pom.xml .
-RUN mvn dependency:go-offline -B
-
-# Copy toàn bộ mã nguồn vào và tiến hành build jar
 COPY src ./src
-RUN mvn clean package -DskipTests
+RUN --mount=type=cache,target=/root/.m2 mvn -B -ntp package -Dmaven.test.skip=true
 
 # ==========================================
 # STAGE 2: Chạy ứng dụng với JRE 25
