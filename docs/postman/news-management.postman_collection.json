@@ -1,7 +1,7 @@
 {
   "info": {
     "name": "News Management API",
-    "description": "Các request mẫu cho API đăng nhập, đọc/quản lý tin tức và upload file. Chạy server trước, đặt accessToken sau khi đăng nhập để gọi các request private.",
+    "description": "Các request demo cho News Management API. Login, Create news và Upload image tự lưu token, ID và tên file từ response thành công.",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "auth": {
@@ -18,7 +18,7 @@
     { "key": "baseUrl", "value": "http://localhost:8080" },
     { "key": "accessToken", "value": "" },
     { "key": "categoryId", "value": "1" },
-    { "key": "newsId", "value": "1" },
+    { "key": "newsId", "value": "" },
     { "key": "slugOrId", "value": "1" },
     { "key": "fileName", "value": "" }
   ],
@@ -42,6 +42,13 @@
         },
         {
           "name": "Login (seed admin)",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": ["pm.collectionVariables.unset('accessToken');", "if (pm.response.code === 200) pm.collectionVariables.set('accessToken', pm.response.json().data.accessToken);"]
+            }
+          }],
           "request": {
             "auth": { "type": "noauth" },
             "method": "POST",
@@ -51,7 +58,7 @@
               "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}",
               "options": { "raw": { "language": "json" } }
             },
-            "description": "Tài khoản mẫu được tạo khi database trống. Lấy data.accessToken từ response và gán vào collection variable accessToken để gọi API private.",
+            "description": "Tài khoản mẫu được tạo khi database trống. Đổi body để đăng nhập bằng tài khoản khác; chỉ ADMIN được xóa tin/file.",
             "url": "{{baseUrl}}/api/v1/auth/login"
           }
         }
@@ -66,7 +73,7 @@
             "auth": { "type": "noauth" },
             "method": "GET",
             "url": {
-              "raw": "{{baseUrl}}/api/v1/public/news?page=1&limit=10&sortBy=createdAt&sortDir=desc&keyword=&categoryId=",
+              "raw": "{{baseUrl}}/api/v1/public/news?page=1&limit=10&sortBy=createdAt&sortDir=desc",
               "host": ["{{baseUrl}}"],
               "path": ["api", "v1", "public", "news"],
               "query": [
@@ -97,12 +104,19 @@
           "name": "List and search news",
           "request": {
             "method": "GET",
-            "url": "{{baseUrl}}/api/v1/admin/news?page=1&limit=10&sortBy=createdAt&sortDir=desc&keyword=&categoryId=",
-            "description": "Có thể bỏ trống keyword/categoryId; sortBy mặc định là createdAt, sortDir nhận asc hoặc desc."
+            "url": "{{baseUrl}}/api/v1/admin/news?page=1&limit=10&sortBy=createdAt&sortDir=desc",
+            "description": "Thêm keyword và categoryId ở tab Params để thử tìm kiếm kết hợp lọc."
           }
         },
         {
           "name": "Create news",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": ["pm.collectionVariables.unset('newsId');", "if (pm.response.code === 201) {", "  const news = pm.response.json().data;", "  pm.collectionVariables.set('newsId', news.id);", "  pm.collectionVariables.set('slugOrId', news.id);", "}"]
+            }
+          }],
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
@@ -142,6 +156,13 @@
       "item": [
         {
           "name": "Upload image",
+          "event": [{
+            "listen": "test",
+            "script": {
+              "type": "text/javascript",
+              "exec": ["pm.collectionVariables.unset('fileName');", "if (pm.response.code === 201) pm.collectionVariables.set('fileName', pm.response.json().data.fileName);"]
+            }
+          }],
           "request": {
             "method": "POST",
             "body": {
@@ -155,11 +176,19 @@
           }
         },
         {
+          "name": "Read uploaded image (public)",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "GET",
+            "url": "{{baseUrl}}/uploads/{{fileName}}"
+          }
+        },
+        {
           "name": "Delete uploaded file",
           "request": {
             "method": "DELETE",
             "url": "{{baseUrl}}/api/v1/files/{{fileName}}",
-            "description": "Gán fileName bằng tên file được trả về từ request Upload image."
+            "description": "Chỉ ADMIN. Dùng fileName được lưu từ request Upload image."
           }
         }
       ]
